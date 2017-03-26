@@ -68,33 +68,49 @@ EAP <- function(student, lower=-6, upper=6){ # creating EAP function; takes in s
                                                               # integrate the likelihood
                                                               # times the prior, given
                                                               # our data
-  posterior <- integrate(integrand, lower=lower, upper=upper) # we use the integrand in the
+  posterior <- integrate(Vectorize(integrand), lower=lower, upper=upper) # we use 
+                                                              # the integrand in the
                                                               # integrate function to yield
                                                               # our expected a posteriori
                                                               # value
+                                                              # initially, the integrate
+                                                              # function threw a warning that
+                                                              # the object lengths of the
+                                                              # inputs did not match; the
+                                                              # help file suggested using
+                                                              # Vectorize() to get the
+                                                              # function in the correct form
   return(posterior)
 }
 
 EAP(Bob)
 
-plotting <- function(student){
-  lower_bound <- -10
-  upper_bound <- 10
+plotting <- function(student, lower_bound=-10, upper_bound=-10, questions=c(1:4)){
   points <- seq(from=lower_bound, to=upper_bound, by=0.1)
-  probs <- NULL
-  for(i in points){
-    probs <- append(probs, prob_answers(student, i)[[1]])
-  }
-  question1 <- probs[seq(from=1, to=length(probs), by=20)]
-  question1_correct <- student$correct_answers[1]==1
-  question1_color <- ifelse(question1_correct==TRUE, "forestgreen", "firebrick1")
-  plot(points, question1, type="l", col=question1_color, xlab=expression(paste(theta, " values")), 
+  probs <- sapply(points, function(x) prob_answers(student, x)[[1]])
+  probs_for_questions <- probs[questions,]
+  questions_correct <- sapply(questions, function(x) student$correct_answers[x]==1)
+  questions_color <- ifelse(questions_correct==TRUE, "forestgreen", "firebrick1")
+  layout(matrix(c(1,2), nrow=2), heights = c(0.7,0.3))
+  plot(points, probs_for_questions[1,], type="l", col=question1_color, 
+       xlab=expression(paste(theta, " values")), 
        ylab=expression(paste("Pr(P"[ij],"=1)")), main="Response Function for Question 1",
        xaxt="n", yaxt="n")
   axis(1, at=seq(from=lower_bound, to=upper_bound, by=1))
   axis(2, at=seq(from=0, to=1, by=0.1), tick=TRUE)
   theta_hat <- EAP(student)
   abline(v=theta_hat$value, col="dodgerblue")
+  # adjusting plotting margins to create legend
+  par(mar=c(0,0,0,0))
+  plot(0,0, type="n", axes=FALSE, xlab="", ylab="") # creating null plot
+  # creating a legend for the null plot, which is effectively the legend for the above
+  # plot
+  legend("center",legend=c(paste0("Response Function (",student$name," answered correctly)"), 
+                           paste0("Response Function (",student$name," answered incorrectly)"),
+                           paste0(student$name,"'s EAP")), # providing items in legend
+         col=c("forestgreen","firebrick1","dodgerblue"), 
+         # providing color for each item in legend
+         lty = c(1,1,1)) # providing line type for each item in legend
 }
 
 
