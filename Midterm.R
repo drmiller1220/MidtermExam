@@ -85,32 +85,46 @@ EAP <- function(student, lower=-6, upper=6){ # creating EAP function; takes in s
 
 EAP(Bob)
 
-plotting <- function(student, lower_bound=-10, upper_bound=-10, questions=c(1:4)){
+plotting <- function(student, lower_bound=-10, upper_bound=10, questions=c(1:4)){
   points <- seq(from=lower_bound, to=upper_bound, by=0.1)
   probs <- sapply(points, function(x) prob_answers(student, x)[[1]])
-  probs_for_questions <- probs[questions,]
+  probs_for_questions <- unlist(probs[questions,])
   questions_correct <- sapply(questions, function(x) student$correct_answers[x]==1)
   questions_color <- ifelse(questions_correct==TRUE, "forestgreen", "firebrick1")
-  layout(matrix(c(1,2), nrow=2), heights = c(0.7,0.3))
-  plot(points, probs_for_questions[1,], type="l", col=question1_color, 
-       xlab=expression(paste(theta, " values")), 
-       ylab=expression(paste("Pr(P"[ij],"=1)")), main="Response Function for Question 1",
-       xaxt="n", yaxt="n")
-  axis(1, at=seq(from=lower_bound, to=upper_bound, by=1))
-  axis(2, at=seq(from=0, to=1, by=0.1), tick=TRUE)
   theta_hat <- EAP(student)
-  abline(v=theta_hat$value, col="dodgerblue")
-  # adjusting plotting margins to create legend
-  par(mar=c(0,0,0,0))
-  plot(0,0, type="n", axes=FALSE, xlab="", ylab="") # creating null plot
-  # creating a legend for the null plot, which is effectively the legend for the above
-  # plot
-  legend("center",legend=c(paste0("Response Function (",student$name," answered correctly)"), 
-                           paste0("Response Function (",student$name," answered incorrectly)"),
-                           paste0(student$name,"'s EAP")), # providing items in legend
-         col=c("forestgreen","firebrick1","dodgerblue"), 
-         # providing color for each item in legend
-         lty = c(1,1,1)) # providing line type for each item in legend
+  plotting_function <- function(x){
+    opar <- par(mar=c(5.1, 4.1, 4.1, 2.1))
+    # saving defaultmargin parameters so we can restore them after adding the legend
+    # for each plot
+    layout(matrix(c(1,2), nrow=2), heights = c(0.7,0.3))
+    plot(points, probs_for_questions[x,], type="l", col=questions_color[x], 
+         xlab=expression(paste(theta, " values")), 
+         ylab=expression(paste("Pr(P"[ij],"=1)")), 
+         main=paste0("Response Function for Question ",x),
+         xaxt="n", yaxt="n")
+    axis(1, at=seq(from=lower_bound, to=upper_bound, by=1))
+    axis(2, at=seq(from=0, to=1, by=0.1), tick=TRUE)
+    abline(v=theta_hat$value, col="dodgerblue")
+    # adjusting plotting margins to create legend
+    par(mar=c(0,0,0,0))
+    plot(0,0, type="n", axes=FALSE, xlab="", ylab="") # creating null plot
+    # creating a legend for the null plot, which is effectively the legend for the above
+    # plot
+    legend("center",
+           legend=c(paste0("Response Function (",student$name," answered correctly)"), 
+                    paste0("Response Function (",student$name," answered incorrectly)"),
+                    paste0(student$name,"'s EAP")), # providing items in legend
+           col=c("forestgreen","firebrick1","dodgerblue"), 
+           # providing color for each item in legend
+           lty = c(1,1,1)) # providing line type for each item in legend
+    par(opar) # resetting margins
+  }
+  plots <- sapply(questions, function(x) plotting_function(x))
 }
 
+student <- Bob
+lower_bound <- -10
+upper_bound <- 10
+questions <- 1:4
 
+plotting(Bob)
