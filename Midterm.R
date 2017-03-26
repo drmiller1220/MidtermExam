@@ -16,7 +16,7 @@ Bob
 prob_answers <- function(object, proposal){ 
 #inputs are the student object and a proposed theta
   prob_corr_question <- exp(proposal - object$difficulty)/ # probability that the student
-    (1+ exp(proposal - object$difficult))                  # answers each question correctly
+    (1+ exp(proposal - object$difficulty))                  # answers each question correctly
                                                            # given difficulty and theta
   prob_obs_answer <- ifelse(object$correct_answers==1, 
                             prob_corr_question, # given our theta and difficulty, we want the
@@ -60,3 +60,41 @@ prior <- function(proposal){ # creating function to yield a prior
 }
 
 Bob_prior <- prior(0.5) # verifying that the function returns the prior
+
+EAP <- function(student, lower=-6, upper=6){ # creating EAP function; takes in student object
+                                             # and integration limits, defaulted to -6 and 6
+  integrand <- function(x) lik_answers(student, x) * prior(x) # specifying function to
+                                                              # integrate, we want to
+                                                              # integrate the likelihood
+                                                              # times the prior, given
+                                                              # our data
+  posterior <- integrate(integrand, lower=lower, upper=upper) # we use the integrand in the
+                                                              # integrate function to yield
+                                                              # our expected a posteriori
+                                                              # value
+  return(posterior)
+}
+
+EAP(Bob)
+
+plotting <- function(student){
+  lower_bound <- -10
+  upper_bound <- 10
+  points <- seq(from=lower_bound, to=upper_bound, by=0.1)
+  probs <- NULL
+  for(i in points){
+    probs <- append(probs, prob_answers(student, i)[[1]])
+  }
+  question1 <- probs[seq(from=1, to=length(probs), by=20)]
+  question1_correct <- student$correct_answers[1]==1
+  question1_color <- ifelse(question1_correct==TRUE, "forestgreen", "firebrick1")
+  plot(points, question1, type="l", col=question1_color, xlab=expression(paste(theta, " values")), 
+       ylab=expression(paste("Pr(P"[ij],"=1)")), main="Response Function for Question 1",
+       xaxt="n", yaxt="n")
+  axis(1, at=seq(from=lower_bound, to=upper_bound, by=1))
+  axis(2, at=seq(from=0, to=1, by=0.1), tick=TRUE)
+  theta_hat <- EAP(student)
+  abline(v=theta_hat$value, col="dodgerblue")
+}
+
+
