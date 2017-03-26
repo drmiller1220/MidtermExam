@@ -13,8 +13,8 @@ install(pkg="raschPack", local=TRUE)
 library(raschPack) # loading in the package
 
 # simulating data for toy example
-diff_params <- rnorm(20,0,2)
-answers <- rbinom(20,1, prob=0.9)
+diff_params <- rnorm(20,0,3)
+answers <- rbinom(20,1, prob=0.7)
 
 bob <- new("Rasch", name="Bob", difficulty=diff_params, correct_answers=answers)
 bob
@@ -54,3 +54,6 @@ raschPlot(raschObj=bob, lower_bound=-3, upper_bound=3,
 raschPlot(raschObj=bob, lower_bound=-10, upper_bound=10, 
           questions=c(6,10,15), theta_EAP=FALSE)
 # turning off the EAP
+
+raschInfo(bob,1)
+# obtaining the Fisher's information for each question given the student and a proposed theta
