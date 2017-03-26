@@ -1,0 +1,21 @@
+Package: raschPack
+Title: Calculating ability parameters with a Rasch model
+Version: 0.1
+Author: David R. Miller
+Maintainer: David R. Miller <drmiller@wustl.edu>
+Description: Use Rasch model to calculate and plot ability parameters
+Depends:
+    R (>= 3.0.0),
+    methods
+License: GPL (>= 2)
+Suggests:
+    devtools
+Collate:
+    'raschPack-package.R'
+    'Rasch.R'
+    'raschProb.R'
+    'raschLik.R'
+    'raschPrior.R'
+    'raschEAP.R'
+    'raschPlot.R'
+RoxygenNote: 6.0.1
